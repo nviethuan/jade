@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Danh sách ví</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class'
+    }
+  </script>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 transition-colors duration-200">
+  <div class="container mx-auto px-2 sm:px-4 py-4 sm:py-8">
+    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-8">
+      <div class="flex items-center gap-4">
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-0">Danh sách ví</h1>
+        <button onclick="toggleTheme()" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600">
+          <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5 text-gray-800" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+          </svg>
+          <svg id="theme-toggle-light-icon" class="hidden w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"></path>
+          </svg>
+        </button>
+      </div>
+      <button onclick="openModal()" class="bg-blue-500 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-800 text-white font-bold py-2 px-4 rounded w-full sm:w-auto">
+        Tạo ví mới
+      </button>
+    </div>
+    
+    <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+        <thead class="bg-gray-50 dark:bg-gray-700">
+          <tr>
+            <th class="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Cặp</th>
+            <th class="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Base</th>
+            <th class="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Quote</th>
+            <th class="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Đã mua</th>
+            <th class="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Đã bán</th>
+            <th class="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Phí</th>
+            <th class="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Kích hoạt</th>
+            <th class="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+          {% for wallet in wallets %}
+          <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+            <td class="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap">
+              <span class="text-sm font-medium text-gray-900 dark:text-white">{{ wallet.symBase }}/{{ wallet.symQuote }}</span>
+              <div class="sm:hidden mt-1">
+                <div class="text-xs text-gray-500 dark:text-gray-400">Base: {{ wallet.base }}</div>
+                <div class="text-xs text-gray-500 dark:text-gray-400">Quote: {{ wallet.quote }}</div>
+                <div class="text-xs text-gray-500 dark:text-gray-400">Đã mua: {% if wallet.bought == 999999999999 %}∞{% else %}{{ wallet.bought }}{% endif %}</div>
+                <div class="text-xs text-gray-500 dark:text-gray-400">Đã bán: {{ wallet.sold }}</div>
+                <div class="text-xs text-gray-500 dark:text-gray-400">Phí: {{ wallet.fee }}</div>
+                <div class="text-xs text-gray-500 dark:text-gray-400">Kích hoạt: {{ wallet.isActive }}</div>
+              </div>
+            </td>
+            <td class="hidden sm:table-cell px-6 py-4 whitespace-nowrap">
+              <span class="text-sm text-gray-500 dark:text-gray-400">{{ wallet.base }}</span>
+            </td>
+            <td class="hidden sm:table-cell px-6 py-4 whitespace-nowrap">
+              <span class="text-sm text-gray-500 dark:text-gray-400">{{ wallet.quote }}</span>
+            </td>
+            <td class="hidden sm:table-cell px-6 py-4 whitespace-nowrap">
+              <span class="text-sm text-gray-500 dark:text-gray-400">{% if wallet.bought == 999999999999 %}∞{% else %}{{ wallet.bought }}{% endif %}</span>
+            </td>
+            <td class="hidden sm:table-cell px-6 py-4 whitespace-nowrap">
+              <span class="text-sm text-gray-500 dark:text-gray-400">{{ wallet.sold }}</span>
+            </td>
+            <td class="hidden sm:table-cell px-6 py-4 whitespace-nowrap">
+              <span class="text-sm text-gray-500 dark:text-gray-400">{{ wallet.fee }}</span>
+            </td>
+            <td class="hidden sm:table-cell px-6 py-4 whitespace-nowrap">
+              <input type="checkbox" class="form-checkbox h-4 w-4 text-blue-600 dark:text-blue-400" {% if wallet.isActive %}checked{% endif %} onchange="updateWalletStatus('{{ wallet._id }}', this.checked)">
+            </td>
+            <td class="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap relative">
+              <div class="relative inline-block text-left">
+                <button onclick="toggleMenu('{{ wallet._id }}')" class="bg-gray-100 dark:bg-gray-700 rounded-full p-1.5 sm:p-2 hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none">
+                  <svg class="h-4 w-4 sm:h-5 sm:w-5 text-gray-500 dark:text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                  </svg>
+                </button>
+                <div id="menu-{{ wallet._id }}" class="hidden origin-top-right fixed mt-2 w-40 sm:w-48 rounded-md shadow-lg bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 z-50">
+                  <div class="py-1">
+                    <button onclick="editWallet('{{ wallet._id }}')" class="block w-full text-left px-4 py-2 text-xs sm:text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600">
+                      Chỉnh sửa
+                    </button>
+                    <button onclick="deleteWallet('{{ wallet._id }}')" class="block w-full text-left px-4 py-2 text-xs sm:text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-600">
+                      Xóa
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div id="createModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 dark:bg-gray-900 dark:bg-opacity-50 overflow-y-auto h-full w-full">
+    <div class="relative top-4 sm:top-20 mx-auto p-4 sm:p-5 border w-[350px] sm:w-96 shadow-lg rounded-md bg-white dark:bg-gray-800">
+      <div class="mt-2 sm:mt-3">
+        <h3 id="modalTitle" class="text-lg font-medium leading-6 text-gray-900 dark:text-white mb-4">Tạo ví mới</h3>
+        <form id="createWalletForm">
+          <input type="hidden" id="walletId">
+          <div class="mb-3 sm:mb-4">
+            <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-1 sm:mb-2" for="symBase">
+              Base Symbol
+            </label>
+            <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-300 dark:bg-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
+              id="symBase" type="text" placeholder="BTC" required autocomplete="off">
+          </div>
+          <div class="mb-3 sm:mb-4">
+            <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-1 sm:mb-2" for="symQuote">
+              Quote Symbol
+            </label>
+            <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-300 dark:bg-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
+              id="symQuote" type="text" placeholder="USDT" required autocomplete="off">
+          </div>
+          <div class="mb-3 sm:mb-4">
+            <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-1 sm:mb-2" for="base">
+              Base Amount
+            </label>
+            <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-300 dark:bg-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
+              id="base" type="number" step="0.00000001" value="0" required autocomplete="off">
+          </div>
+          <div class="mb-3 sm:mb-4">
+            <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-1 sm:mb-2" for="quote">
+              Quote Amount
+            </label>
+            <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-300 dark:bg-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
+              id="quote" type="number" step="0.00000001" value="100" required autocomplete="off">
+          </div>
+          <div class="mb-3 sm:mb-4">
+            <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-1 sm:mb-2" for="fee">
+              Phí (%)
+            </label>
+            <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-300 dark:bg-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
+              id="fee" type="number" step="0.001" placeholder="0.001" value="0.001" required autocomplete="off">
+          </div>
+          <div class="mb-3 sm:mb-4">
+            <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-1 sm:mb-2" for="isActive">
+              Kích hoạt
+            </label>
+            <input type="checkbox" id="isActive" class="form-checkbox h-4 w-4 text-blue-600 dark:text-blue-400">
+          </div>
+          <div class="flex items-center justify-between mt-4 sm:mt-6">
+            <button type="button" onclick="closeModal()" class="bg-gray-500 hover:bg-gray-700 dark:bg-gray-600 dark:hover:bg-gray-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline text-sm">
+              Hủy
+            </button>
+            <button type="submit" class="bg-blue-500 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline text-sm">
+              <span id="submitButtonText">Tạo</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Theme toggle functionality
+    function toggleTheme() {
+      if (document.documentElement.classList.contains('dark')) {
+        document.documentElement.classList.remove('dark');
+        localStorage.theme = 'light';
+      } else {
+        document.documentElement.classList.add('dark');
+        localStorage.theme = 'dark';
+      }
+      updateThemeIcons();
+    }
+
+    function updateThemeIcons() {
+      const darkIcon = document.getElementById('theme-toggle-dark-icon');
+      const lightIcon = document.getElementById('theme-toggle-light-icon');
+      
+      if (document.documentElement.classList.contains('dark')) {
+        darkIcon.classList.add('hidden');
+        lightIcon.classList.remove('hidden');
+      } else {
+        darkIcon.classList.remove('hidden');
+        lightIcon.classList.add('hidden');
+      }
+    }
+
+    // Check initial theme
+    if (!('theme' in localStorage)) {
+      localStorage.theme = 'dark';
+    }
+    
+    if (localStorage.theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    updateThemeIcons();
+
+    function openModal(isEdit = false) {
+      document.getElementById('createModal').classList.remove('hidden');
+      if (!isEdit) {
+        document.getElementById('modalTitle').textContent = 'Tạo ví mới';
+        document.getElementById('submitButtonText').textContent = 'Tạo';
+        document.getElementById('createWalletForm').reset();
+        document.getElementById('walletId').value = '';
+      }
+    }
+
+    function closeModal() {
+      document.getElementById('createModal').classList.add('hidden');
+    }
+
+    function toggleMenu(id) {
+      const menu = document.getElementById(`menu-${id}`);
+      const allMenus = document.querySelectorAll('[id^="menu-"]');
+      
+      // Hide all other menus
+      allMenus.forEach(m => {
+        if (m.id !== `menu-${id}`) {
+          m.classList.add('hidden');
+        }
+      });
+      
+      menu.classList.toggle('hidden');
+    }
+
+    // Close menus when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.relative')) {
+        const allMenus = document.querySelectorAll('[id^="menu-"]');
+        allMenus.forEach(menu => menu.classList.add('hidden'));
+      }
+    });
+
+    async function editWallet(id) {
+      try {
+        const response = await fetch(`/wallets/${id}`);
+        if (!response.ok) throw new Error('Failed to fetch wallet');
+        
+        const wallet = await response.json();
+        
+        // Populate form with wallet data
+        document.getElementById('walletId').value = wallet._id;
+        document.getElementById('symBase').value = wallet.symBase;
+        document.getElementById('symQuote').value = wallet.symQuote;
+        document.getElementById('base').value = wallet.base;
+        document.getElementById('quote').value = wallet.quote;
+        document.getElementById('fee').value = wallet.fee;
+        document.getElementById('isActive').checked = wallet.isActive;
+        
+        // Update modal title and button text
+        document.getElementById('modalTitle').textContent = 'Chỉnh sửa ví';
+        document.getElementById('submitButtonText').textContent = 'Cập nhật';
+        
+        openModal(true);
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Có lỗi xảy ra khi tải thông tin ví');
+      }
+    }
+
+    async function deleteWallet(id) {
+      if (confirm('Bạn có chắc chắn muốn xóa ví này?')) {
+        try {
+          const response = await fetch(`/wallets/${id}`, {
+            method: 'DELETE'
+          });
+          
+          if (response.ok) {
+            window.location.reload();
+          } else {
+            throw new Error('Failed to delete wallet');
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          alert('Có lỗi xảy ra khi xóa ví');
+        }
+      }
+    }
+
+    async function updateWalletStatus(id, isActive) {
+      try {
+        const response = await fetch(`/wallets/${id}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ isActive })
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to update wallet status');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Có lỗi xảy ra khi cập nhật trạng thái ví');
+        // Revert checkbox state on error
+        const checkbox = document.querySelector(`input[type="checkbox"][onchange*="${id}"]`);
+        if (checkbox) {
+          checkbox.checked = !isActive;
+        }
+      }
+    }
+
+    document.getElementById('createWalletForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const formData = {
+        symBase: document.getElementById('symBase').value,
+        symQuote: document.getElementById('symQuote').value,
+        base: parseFloat(document.getElementById('base').value),
+        quote: parseFloat(document.getElementById('quote').value),
+        fee: parseFloat(document.getElementById('fee').value),
+        isActive: document.getElementById('isActive').checked
+      };
+
+      const walletId = document.getElementById('walletId').value;
+      const method = walletId ? 'PUT' : 'POST';
+      const url = walletId ? `/wallets/${walletId}` : '/wallets';
+
+      try {
+        const response = await fetch(url, {
+          method,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData)
+        });
+
+        if (response.ok) {
+          closeModal();
+          window.location.reload();
+        } else {
+          alert('Có lỗi xảy ra khi lưu ví');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Có lỗi xảy ra khi lưu ví');
+      }
+    });
+  </script>
+</body>
+</html>
