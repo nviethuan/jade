@@ -3,7 +3,7 @@
   "rewrites": [
     {
       "source": "/(.*)",
-      "destination": "/bin/www.mjs"
+      "destination": "/bin/www"
     }
   ]
 }
