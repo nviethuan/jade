@@ -34,6 +34,7 @@
       <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
         <thead class="bg-gray-50 dark:bg-gray-700">
           <tr>
+            <th class="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">No.</th>
             <th class="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Cặp</th>
             <th class="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Base</th>
             <th class="hidden sm:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Quote</th>
@@ -47,6 +48,9 @@
         <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
           {% for wallet in wallets %}
           <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+            <td class="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap">
+              <span class="text-sm text-gray-500 dark:text-gray-400">{{ loop.index }}</span>
+            </td>
             <td class="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap">
               <span class="text-sm font-medium text-gray-900 dark:text-white">{{ wallet.symBase }}/{{ wallet.symQuote }}</span>
               <div class="sm:hidden mt-1">
