@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import nunjucks from 'nunjucks';
 import { connect } from 'mongoose';
+// import './src/application/main.mjs';
 
 import indexRouter from './routes/index.mjs';
 import walletRouter from './routes/wallet.route.mjs';

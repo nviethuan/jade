@@ -15,5 +15,8 @@
     "mongoose": "^8.13.0",
     "morgan": "~1.9.1",
     "nunjucks": "^3.2.4"
+  },
+  "devDependencies": {
+    "@binance/connector-typescript": "^0.3.16"
   }
 }
