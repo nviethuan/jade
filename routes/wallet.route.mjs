@@ -19,25 +19,25 @@ router.get('/:id', async (req, res) => {
 router.post('/', async (req, res) => {
   const wallet = new Wallet();
   await wallet.create(req.body);
-  res.redirect('/wallets');
+  return res.status(200).json({ message: 'Wallet created successfully' });
 });
 
 router.put('/:id', async (req, res) => {
   const wallet = new Wallet();
   await wallet.update(req.params.id, req.body);
-  res.redirect('/wallets');
+  return res.status(200).json({ message: 'Wallet updated successfully' });
 });
 
 router.patch('/:id', async (req, res) => {
   const wallet = new Wallet();
   await wallet.update(req.params.id, req.body);
-  res.status(200).json({ message: 'Wallet updated successfully' });
+  return res.status(200).json({ message: 'Wallet updated successfully' });
 });
 
 router.delete('/:id', async (req, res) => {
   const wallet = new Wallet();
   await wallet.delete(req.params.id);
-  res.status(200).json({ message: 'Wallet deleted successfully' });
+  return res.status(200).json({ message: 'Wallet deleted successfully' });
 });
 
 export default router;
