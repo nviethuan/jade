@@ -5,7 +5,7 @@ export class Wallet {
   #wallet = {};
   #wallets = [];
 
-  constructor({ base, quote, symBase, symQuote, bought, sold, fee, isActive } = {}) {
+  constructor({ base, quote, symBase, symQuote, bought, sold, fee, isActive, position } = {}) {
     this.base = base || 0;
     this.quote = quote || 0;
     this.symBase = symBase;
@@ -14,6 +14,7 @@ export class Wallet {
     this.sold = sold || 0;
     this.fee = fee || 0.001;
     this.isActive = isActive || false;
+    this.position = position || 0;
   }
 
   build(data = {}) {
@@ -25,9 +26,14 @@ export class Wallet {
     this.sold = data.sold || this.sold;
     this.fee = data.fee || this.fee;
     this.isActive = data.isActive || this.isActive;
+    this.position = data.position || this.position;
   }
 
   async create(data = {}) {
+    // Get the highest position value and increment by 1
+    const highestPositionWallet = await this.#model.findOne().sort({ position: -1 });
+    const newPosition = highestPositionWallet ? highestPositionWallet.position + 1 : 0;
+    
     this.#wallet = await this.#model.create({
       base: data.base || this.base,
       quote: data.quote || this.quote,
@@ -37,6 +43,7 @@ export class Wallet {
       sold: data.sold || this.sold,
       fee: data.fee || this.fee,
       isActive: data.isActive || this.isActive,
+      position: newPosition,
     });
 
     return this.#wallet;
@@ -54,6 +61,7 @@ export class Wallet {
         sold: data.sold,
         fee: data.fee,
         isActive: data.isActive,
+        position: data.position,
       },
       { new: true }
     );
@@ -66,17 +74,27 @@ export class Wallet {
   }
 
   async findAll() {
-    this.#wallets = await this.#model.find();
+    this.#wallets = await this.#model.find().sort({ position: 1 });
     return this.#wallets;
   }
 
   async paginate(conditions, page, limit) {
     const skip = (page - 1) * limit;
-    const wallets = await this.#model.find(conditions).skip(skip).limit(limit);
+    const wallets = await this.#model.find(conditions).sort({ position: 1 }).skip(skip).limit(limit);
     return wallets;
   }
 
   async delete(id) {
     await this.#model.findByIdAndDelete(this.#wallet._id || id);
+  }
+
+  async updatePositions(walletPositions) {
+    // walletPositions is an array of objects with { id, position }
+    const updatePromises = walletPositions.map(({ id, position }) => 
+      this.#model.findByIdAndUpdate(id, { position }, { new: true })
+    );
+    
+    await Promise.all(updatePromises);
+    return true;
   }
 }

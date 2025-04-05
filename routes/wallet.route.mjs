@@ -42,4 +42,23 @@ router.delete('/:id', authMiddleware, async (req, res) => {
   return res.status(200).json({ message: 'Wallet deleted successfully' });
 });
 
+// New endpoint to update wallet positions
+router.post('/reorder', authMiddleware, async (req, res) => {
+  try {
+    const { walletPositions } = req.body;
+    
+    if (!walletPositions || !Array.isArray(walletPositions)) {
+      return res.status(400).json({ error: 'Invalid wallet positions data' });
+    }
+    
+    const wallet = new Wallet();
+    await wallet.updatePositions(walletPositions);
+    
+    return res.status(200).json({ message: 'Wallet positions updated successfully' });
+  } catch (error) {
+    console.error('Error updating wallet positions:', error);
+    return res.status(500).json({ error: 'Failed to update wallet positions' });
+  }
+});
+
 export default router;

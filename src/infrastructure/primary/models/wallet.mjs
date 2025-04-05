@@ -47,11 +47,18 @@ const walletSchema = new mongoose.Schema(
       required: true,
       default: false,
     },
+    position: {
+      type: Number,
+      default: 0,
+    },
   },
   {
     timestamps: true,
   }
 );
+
+// Add index for position field to improve sorting performance
+walletSchema.index({ position: 1 });
 
 const Wallet = mongoose.model('Wallet', walletSchema);
 

@@ -12,6 +12,16 @@
         darkMode: 'class'
       }
     </script>
+    <!-- Add Sortable.js for drag and drop functionality -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <style>
+      .sortable-ghost {
+        background-color: rgba(59, 130, 246, 0.2) !important;
+      }
+      .dark .sortable-ghost {
+        background-color: rgba(30, 64, 175, 0.3) !important;
+      }
+    </style>
   </head>
   <body class="bg-gray-100 dark:bg-gray-900 transition-colors duration-200">
     <div class="container mx-auto px-2 sm:px-4 py-4 sm:py-8">
@@ -47,11 +57,16 @@
               <th class="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Thao tác</th>
             </tr>
           </thead>
-          <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+          <tbody id="walletTableBody" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
             {% for wallet in wallets %}
-              <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
+              <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 cursor-move" data-id="{{ wallet._id }}" data-position="{{ wallet.position }}">
                 <td class="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap">
-                  <span class="text-sm text-gray-500 dark:text-gray-400">{{ loop.index }}</span>
+                  <div class="flex items-center">
+                    <svg class="h-4 w-4 mr-2 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" />
+                    </svg>
+                    <span class="text-sm text-gray-500 dark:text-gray-400">{{ loop.index }}</span>
+                  </div>
                 </td>
                 <td class="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap">
                   <span class="text-sm font-medium text-gray-900 dark:text-white">{{ wallet.symBase }}/{{ wallet.symQuote }}</span>
@@ -481,6 +496,63 @@
             showNotification('Có lỗi xảy ra khi lưu ví', 'error');
           }
         });
+
+      // Initialize Sortable.js for drag and drop functionality
+      document.addEventListener('DOMContentLoaded', function() {
+        const walletTableBody = document.getElementById('walletTableBody');
+        
+        if (walletTableBody) {
+          new Sortable(walletTableBody, {
+            animation: 150,
+            handle: '.cursor-move',
+            ghostClass: 'sortable-ghost',
+            onEnd: function(evt) {
+              // Get all rows and their new positions
+              const rows = walletTableBody.querySelectorAll('tr');
+              const walletPositions = Array.from(rows).map((row, index) => {
+                return {
+                  id: row.getAttribute('data-id'),
+                  position: index
+                };
+              });
+              
+              // Update the position numbers displayed
+              rows.forEach((row, index) => {
+                const indexCell = row.querySelector('td:first-child span:last-child');
+                if (indexCell) {
+                  indexCell.textContent = index + 1;
+                }
+              });
+              
+              // Save the new order to the server
+              saveWalletPositions(walletPositions);
+            }
+          });
+        }
+      });
+      
+      // Function to save wallet positions to the server
+      async function saveWalletPositions(walletPositions) {
+        try {
+          const response = await fetch('/wallets/reorder', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ walletPositions }),
+          });
+          
+          if (!response.ok) {
+            throw new Error('Failed to update wallet positions');
+          }
+          
+          const result = await response.json();
+          console.log('Wallet positions updated successfully');
+        } catch (error) {
+          console.error('Error updating wallet positions:', error);
+          // You could add a toast notification here to inform the user
+        }
+      }
     </script>
   </body>
 </html>

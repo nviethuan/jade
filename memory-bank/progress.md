@@ -28,6 +28,13 @@
    - Dark/light theme toggle with persistent user preference
    - Default dark theme for better visibility in low-light environments
 
+5. Wallet Management
+   - Wallet listing and CRUD operations
+   - Drag and drop reordering of wallet rows
+   - Position persistence in MongoDB
+   - Visual indicators for draggable rows
+   - Real-time UI updates during reordering
+
 ## What's Left to Build
 1. Core Features
    - [To be defined based on requirements]
@@ -57,11 +64,13 @@
    - Basic monitoring implemented
    - Enhanced monitoring with accurate metrics
    - UI improvements with theme support
+   - Wallet management with drag and drop functionality
 
 2. Development Status
    - Environment ready
    - Structure established
    - System monitoring active
+   - Wallet management implemented
    - Ready for feature implementation
 
 3. Documentation Status
@@ -109,12 +118,20 @@
    - Dark/light theme toggle for improved user experience
    - Theme preference persistence using localStorage
 
+4. Wallet Management
+   - MongoDB for data persistence
+   - Sortable.js for drag and drop functionality
+   - Position field for order tracking
+   - Real-time UI updates during reordering
+   - RESTful API for position updates
+
 ## Milestones
 1. Completed
    - Project initialization
    - Basic structure setup
    - Documentation framework
    - System monitoring dashboard
+   - Wallet management with drag and drop
 
 2. In Progress
    - Requirements gathering
