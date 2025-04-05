@@ -78,9 +78,15 @@ export class Wallet {
     return this.#wallets;
   }
 
-  async paginate(conditions, page, limit) {
+  async paginate(conditions, page, limit, sortField = 'position', sortDirection = 'asc') {
     const skip = (page - 1) * limit;
-    const wallets = await this.#model.find(conditions).sort({ position: 1 }).skip(skip).limit(limit);
+    const sortOptions = {};
+    sortOptions[sortField] = sortDirection === 'asc' ? 1 : -1;
+    
+    const wallets = await this.#model.find(conditions)
+      .sort(sortOptions)
+      .skip(skip)
+      .limit(limit);
     return wallets;
   }
 

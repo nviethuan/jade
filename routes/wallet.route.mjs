@@ -12,13 +12,19 @@ router.get('/', authMiddleware, async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 15;
   
-  const wallets = await wallet.paginate({}, page, limit);
+  // Get sorting parameters
+  const sortField = req.query.sortField || 'position';
+  const sortDirection = req.query.sortDirection || 'asc';
+  
+  const wallets = await wallet.paginate({}, page, limit, sortField, sortDirection);
   const totalCount = await wallet.getTotalCount();
   
   res.render('wallet', { 
     wallets,
     hasMore: page * limit < totalCount,
-    totalCount
+    totalCount,
+    sortField,
+    sortDirection
   });
 });
 
@@ -28,8 +34,12 @@ router.get('/api/more', authMiddleware, async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 15;
     
+    // Get sorting parameters
+    const sortField = req.query.sortField || 'position';
+    const sortDirection = req.query.sortDirection || 'asc';
+    
     const wallet = new Wallet();
-    const wallets = await wallet.paginate({}, page, limit);
+    const wallets = await wallet.paginate({}, page, limit, sortField, sortDirection);
     
     // Get total count for pagination info
     const totalCount = await wallet.getTotalCount();
