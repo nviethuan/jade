@@ -21,6 +21,17 @@
       .dark .sortable-ghost {
         background-color: rgba(30, 64, 175, 0.3) !important;
       }
+      
+      /* Hide scrollbar for Chrome, Safari and Opera */
+      .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      
+      /* Hide scrollbar for IE, Edge and Firefox */
+      .hide-scrollbar {
+        -ms-overflow-style: none;  /* IE and Edge */
+        scrollbar-width: none;  /* Firefox */
+      }
     </style>
   </head>
   <body class="bg-gray-100 dark:bg-gray-900 transition-colors duration-200">
@@ -42,8 +53,8 @@
       </button>
       </div>
 
-      <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden flex-grow flex flex-col">
-        <div class="overflow-x-auto overflow-y-auto flex-grow">
+      <div class="bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden flex-grow flex flex-col max-h-[calc(100vh-8rem)]">
+        <div class="overflow-x-auto overflow-y-auto flex-grow hide-scrollbar">
           <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead class="bg-gray-50 dark:bg-gray-700 sticky top-0 z-10">
               <tr>
@@ -318,6 +329,11 @@
             .getElementById('walletId')
             .value = '';
         }
+        
+        // Focus the first input field
+        setTimeout(() => {
+          document.getElementById('symBase').focus();
+        }, 100);
       }
 
       function closeModal() {
