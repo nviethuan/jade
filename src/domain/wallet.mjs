@@ -84,6 +84,10 @@ export class Wallet {
     return wallets;
   }
 
+  async getTotalCount(conditions = {}) {
+    return await this.#model.countDocuments(conditions);
+  }
+
   async delete(id) {
     await this.#model.findByIdAndDelete(this.#wallet._id || id);
   }

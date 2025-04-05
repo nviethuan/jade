@@ -8,8 +8,41 @@ const router = express.Router();
 router.get('/', authMiddleware, async (req, res) => {
   const wallet = new Wallet();
 
-  const wallets = await wallet.paginate({}, req.query.page, req.query.limit);
-  res.render('wallet', { wallets });
+  // Set default values for pagination
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 15;
+  
+  const wallets = await wallet.paginate({}, page, limit);
+  const totalCount = await wallet.getTotalCount();
+  
+  res.render('wallet', { 
+    wallets,
+    hasMore: page * limit < totalCount,
+    totalCount
+  });
+});
+
+// New endpoint to fetch more wallets for infinite scrolling
+router.get('/api/more', authMiddleware, async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 15;
+    
+    const wallet = new Wallet();
+    const wallets = await wallet.paginate({}, page, limit);
+    
+    // Get total count for pagination info
+    const totalCount = await wallet.getTotalCount();
+    
+    res.json({
+      wallets,
+      hasMore: page * limit < totalCount,
+      totalCount
+    });
+  } catch (error) {
+    console.error('Error fetching more wallets:', error);
+    res.status(500).json({ error: 'Failed to fetch more wallets' });
+  }
 });
 
 router.get('/:id', authMiddleware, async (req, res) => {
