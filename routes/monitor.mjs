@@ -73,7 +73,7 @@ export function initializeSocket(io) {
       } catch (error) {
         console.error('Error getting system metrics:', error);
       }
-    }, 1000);
+    }, 2000);
 
     socket.on('disconnect', () => {
       console.log('Client disconnected from monitoring system');

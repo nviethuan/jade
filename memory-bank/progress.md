@@ -23,6 +23,10 @@
    - Chart.js visualization for metrics
    - Responsive dashboard with TailwindCSS
    - System metrics collection with Node.js os module
+   - Accurate RAM usage calculation using systeminformation package
+   - RAM Usage Ratio chart showing Used RAM/Total RAM percentage
+   - Dark/light theme toggle with persistent user preference
+   - Default dark theme for better visibility in low-light environments
 
 ## What's Left to Build
 1. Core Features
@@ -51,6 +55,8 @@
    - Documentation
    - Planning
    - Basic monitoring implemented
+   - Enhanced monitoring with accurate metrics
+   - UI improvements with theme support
 
 2. Development Status
    - Environment ready
@@ -98,15 +104,10 @@
    - TailwindCSS for responsive design
    - Node.js os module for system metrics
    - 1-second update interval
-   - 20-point data history
-
-4. Future Considerations
-   - Scalability requirements
-   - Performance optimization
-   - Security measures
-   - User experience improvements
-   - Additional system metrics
-   - Historical data storage
+   - systeminformation package for accurate RAM metrics
+   - RAM Usage Ratio chart for better memory visualization
+   - Dark/light theme toggle for improved user experience
+   - Theme preference persistence using localStorage
 
 ## Milestones
 1. Completed
