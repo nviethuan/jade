@@ -1,16 +1,29 @@
-import connector from '@binance/connector-typescript';
+import WebSocket from 'ws';
 
-const callbacks = {
-  open: (client) => client.exchangeInfo(),
-  close: () => console.debug('Disconnected from WebSocket server'),
-  message: (data) => console.info(JSON.parse(data)),
-};
+const ws = new WebSocket('wss://testnet.binance.vision/ws-api/v3');
 
-const client = new connector.WebsocketAPI(process.env.BINANCE__API_KEY, process.env.BINANCE__SECRET_KEY, {
-  baseURL: 'wss://testnet.binance.vision/ws-api/v3',
-  callbacks,
+ws.on('open', () => {
+  console.log('Connected to Binance WebSocket');
 });
 
-setTimeout(() => client.disconnect(), 20000);
+ws.on('message', (message) => {
+  console.log(message);
+});
 
-export default client;
+ws.on('close', () => {
+  console.log('Disconnected from Binance WebSocket');
+});
+
+ws.on('disconnected', () => {
+  console.log('Disconnected from Binance WebSocket');
+});
+
+ws.on('error', (error) => {
+  console.error(error);
+});
+
+ws.on('ping', (data) => {
+  ws.pong(data);
+});
+
+export default ws;

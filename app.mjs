@@ -5,12 +5,20 @@ import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import nunjucks from 'nunjucks';
 import { connect } from 'mongoose';
-// import './src/application/main.mjs';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
+import './src/application/main.mjs';
 
 import indexRouter from './routes/index.mjs';
 import walletRouter from './routes/wallet.route.mjs';
+import monitorRouter, { initializeSocket } from './routes/monitor.mjs';
 
 const app = express();
+const httpServer = createServer(app);
+const io = new Server(httpServer);
+
+// Initialize Socket.IO for monitoring
+initializeSocket(io);
 
 nunjucks.configure('views', {
   autoescape: true,
@@ -37,6 +45,7 @@ app.use(express.static(path.resolve('public')));
 
 app.use('/', indexRouter);
 app.use('/wallets', walletRouter);
+app.use('/monitor', monitorRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -54,4 +63,4 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-export default app;
+export { app, httpServer };

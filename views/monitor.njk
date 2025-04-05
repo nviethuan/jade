@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Monitor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+      <h1 class="text-3xl font-bold mb-8 text-gray-800">System Resources Monitor</h1>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- CPU Usage Chart -->
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+          <h2 class="text-xl font-semibold mb-4 text-gray-700">CPU Usage</h2>
+          <canvas id="cpuChart"></canvas>
+        </div>
+        
+        <!-- Available RAM Chart -->
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+          <h2 class="text-xl font-semibold mb-4 text-gray-700">RAM Usage Ratio</h2>
+          <canvas id="availableRamChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Current Stats -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+          <h2 class="text-xl font-semibold mb-4 text-gray-700">Current CPU Usage</h2>
+          <p class="text-4xl font-bold text-blue-600" id="currentCpu">0%</p>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+          <h2 class="text-xl font-semibold mb-4 text-gray-700">Current System RAM Usage</h2>
+          <p class="text-4xl font-bold text-green-600" id="currentRam">0 GB</p>
+        </div>
+      </div>
+
+      <!-- Detailed Memory Stats -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+          <h2 class="text-xl font-semibold mb-4 text-gray-700">Memory Details</h2>
+          <div class="space-y-2">
+            <div class="flex justify-between">
+              <span class="text-gray-600">Total RAM:</span>
+              <span class="font-medium" id="totalRam">0 GB</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Used RAM:</span>
+              <span class="font-medium" id="usedRam">0 GB</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Free RAM:</span>
+              <span class="font-medium" id="freeRam">0 GB</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Active RAM:</span>
+              <span class="font-medium" id="activeRam">0 GB</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Available RAM:</span>
+              <span class="font-medium" id="availableRam">0 GB</span>
+            </div>
+          </div>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+          <h2 class="text-xl font-semibold mb-4 text-gray-700">Node.js Memory Details</h2>
+          <div class="space-y-2">
+            <div class="flex justify-between">
+              <span class="text-gray-600">Heap Used:</span>
+              <span class="font-medium" id="heapUsed">0 GB</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Heap Total:</span>
+              <span class="font-medium" id="heapTotal">0 GB</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">RSS:</span>
+              <span class="font-medium" id="rss">0 GB</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">External:</span>
+              <span class="font-medium" id="external">0 GB</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const socket = io();
+      const maxDataPoints = 20;
+      let cpuData = Array(maxDataPoints).fill(0);
+      let availableRamRatioData = Array(maxDataPoints).fill(0);
+      let labels = Array(maxDataPoints).fill('');
+      let totalRamGB = 0;
+
+      // Initialize CPU Chart
+      const cpuCtx = document
+        .getElementById('cpuChart')
+        .getContext('2d');
+      const cpuChart = new Chart(cpuCtx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'CPU Usage (%)',
+              data: cpuData,
+              borderColor: 'rgb(59, 130, 246)',
+              tension: 0.4,
+              fill: false
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 100
+            }
+          }
+        }
+      });
+
+      // Initialize Available RAM Ratio Chart
+      const availableRamCtx = document
+        .getElementById('availableRamChart')
+        .getContext('2d');
+      const availableRamChart = new Chart(availableRamCtx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'Used RAM / Total RAM (%)',
+              data: availableRamRatioData,
+              borderColor: 'rgb(34, 197, 94)',
+              tension: 0.4,
+              fill: false
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 100,
+              title: {
+                display: true,
+                text: 'Percentage (%)'
+              }
+            }
+          }
+        }
+      });
+
+      // Update charts with new data
+      socket.on('systemMetrics', (data) => {
+        const timestamp = new Date().toLocaleTimeString();
+
+        // Update CPU data
+        cpuData.shift();
+        cpuData.push(data.cpu);
+        document
+          .getElementById('currentCpu')
+          .textContent = `${data.cpu.toFixed(1)}%`;
+
+        // Update RAM data
+        totalRamGB = data.totalRamGB;
+        document
+          .getElementById('currentRam')
+          .textContent = `${data.usedRamGB.toFixed(1)} GB / ${totalRamGB.toFixed(1)} GB (${data.ramUsagePercent.toFixed(1)}%)`;
+
+        // Update Available RAM Ratio data
+        const availableRamRatio = (data.usedRamGB / data.totalRamGB) * 100;
+        availableRamRatioData.shift();
+        availableRamRatioData.push(availableRamRatio);
+
+        // Update detailed memory stats
+        document.getElementById('totalRam').textContent = `${data.totalRamGB.toFixed(1)} GB`;
+        document.getElementById('usedRam').textContent = `${data.usedRamGB.toFixed(1)} GB (${data.ramUsagePercent.toFixed(1)}%)`;
+        document.getElementById('freeRam').textContent = `${data.freeRamGB.toFixed(1)} GB`;
+        document.getElementById('activeRam').textContent = `${data.activeRamGB.toFixed(1)} GB`;
+        document.getElementById('availableRam').textContent = `${data.availableRamGB.toFixed(1)} GB (${availableRamRatio.toFixed(1)}%)`;
+        
+        document.getElementById('heapUsed').textContent = `${data.heapUsedGB.toFixed(2)} GB (${data.heapUsagePercent.toFixed(1)}%)`;
+        document.getElementById('heapTotal').textContent = `${data.heapTotalGB.toFixed(2)} GB`;
+        document.getElementById('rss').textContent = `${data.rssGB.toFixed(2)} GB`;
+        document.getElementById('external').textContent = `${data.externalGB.toFixed(2)} GB`;
+
+        // Update labels
+        labels.shift();
+        labels.push(timestamp);
+
+        // Update charts
+        cpuChart.update('none');
+        availableRamChart.update('none');
+      });
+    </script>
+  </body>
+</html>
